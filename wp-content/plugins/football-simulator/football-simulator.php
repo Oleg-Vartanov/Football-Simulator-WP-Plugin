@@ -99,48 +99,28 @@ function fs_register_post_type_matches() {
     register_post_type( "matches", $args );
 }
 
-add_action( 'save_post_matches', 'fs_update_match_title' );
-function fs_update_match_title($post_id) {
-    $new_fields = get_fields($post_id);
-
-    $home_team_title = $new_fields['home_team']->post_title;
-    $away_team_title = $new_fields['away_team']->post_title;
-
-    $post_update = array(
-        'ID'         => $post_id,
-        'post_title' => $home_team_title . ' - '. $away_team_title
-    );
-    remove_action('save_post_matches', 'fs_update_match_title');
-    wp_update_post( $post_update );
-    add_action('save_post_matches', 'fs_update_match_title');
-}
+require __DIR__ . '/includes/fs-schedule-functions.php';
 
 add_action( 'wp_ajax_fs_select_teams', 'fs_select_teams' );
 add_action( 'wp_ajax_nopriv_fs_select_teams', 'fs_select_teams' );
 function fs_select_teams() {
-    $args = array(
+
+    // Removing old matches
+    $old_matches = get_posts([
+        'post_type' => 'matches',
+        'numberposts' => -1
+    ]);
+    foreach ($old_matches as $old_match) {
+        wp_delete_post( $old_match->ID, true );
+    }
+
+    // Creating new matches
+    $args = [
         'post_type' => 'teams',
         'post__in' => $_POST['team_ids']
-    );
+    ];
     $teams = get_posts($args);
-
-//    get_post_meta($teams[0]->ID, 'level', true);
-
-//    $post_id = wp_insert_post(array (
-//        'post_type' => 'matches',
-//        'post_title' => $your_title,
-//        'post_content' => $your_content,
-//        'post_status' => 'publish',
-//        'comment_status' => 'closed',   // if you prefer
-//        'ping_status' => 'closed',      // if you prefer
-//    ));
-//
-//    if ($post_id) {
-//        // insert post meta
-//        add_post_meta($post_id, '_your_custom_1', $custom1);
-//        add_post_meta($post_id, '_your_custom_2', $custom2);
-//        add_post_meta($post_id, '_your_custom_3', $custom3);
-//    }
+    fs_create_matches($teams);
 
     wp_die();
 }
