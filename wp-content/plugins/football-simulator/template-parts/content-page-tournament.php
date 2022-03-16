@@ -24,14 +24,13 @@
 
         <script>
             jQuery(document).ready(function($) {
-                $('#team-select').change(function () {
-                    if($("select option:selected").length > 4) {
+                $("#next_week").click(function(e) {
+                    if ($("select option:selected").length != 4) {
                         $("#team-select").val("");
                         alert('4 Teams must me selected');
+                        return false;
                     }
-                });
 
-                $("#next_week").click(function(e) {
                     let data = {
                         action: 'fs_select_teams',
                         team_ids: $('#team-select').val()
