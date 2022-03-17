@@ -147,7 +147,7 @@ function fs_start_tournament() {
 add_action( 'wp_ajax_fs_start_week', 'fs_start_week' );
 add_action( 'wp_ajax_nopriv_fs_start_week', 'fs_start_week' );
 function fs_start_week() {
-    simulate_matches($_POST['week']);
+    simulate_matches($_POST['current_week'] + 1);
 }
 
 function simulate_matches($week) {

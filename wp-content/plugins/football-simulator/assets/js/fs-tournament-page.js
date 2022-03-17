@@ -24,7 +24,7 @@ jQuery(document).ready(function($) {
     $(".next_week").click(function(e) {
         let data = {
             action: 'fs_start_week',
-            current_week: $('.current_week').val() + 1
+            current_week: $('.current_week').val()
         };
 
         jQuery.ajax({
@@ -39,7 +39,7 @@ jQuery(document).ready(function($) {
 
     $(".play_all_games").click(function(e) {
         let data = {
-            action: 'fs_start_tournament'
+            action: 'fs_play_all_games'
         };
 
         jQuery.ajax({

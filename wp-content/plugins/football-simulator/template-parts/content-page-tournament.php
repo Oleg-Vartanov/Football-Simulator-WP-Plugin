@@ -40,7 +40,7 @@
         }
         ?>
 
-        <input type="hidden" class="current_week" value="<?php $current_week ?>">
+        <input type="hidden" class="current_week" value="<?php echo $current_week ?>">
 
         <?php if ($status == 'not_started') { ?>
             <div class="container">
