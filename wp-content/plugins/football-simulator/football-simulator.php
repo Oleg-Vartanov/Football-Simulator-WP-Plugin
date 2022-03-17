@@ -153,7 +153,7 @@ function fs_play_all_games() {
         'meta_key'      => 'match_week',
         'meta_value'    => 1
     ]);
-    $weeks_remaining = ((count($weekly_matches) * 2) - 1) * 2;
+    $weeks_remaining = ((count($weekly_matches) * 2) - 1) * 2 - $_POST['current_week'];
     for ($i = 1; $i <= $weeks_remaining; $i++) {
         fs_simulate_matches($_POST['current_week'] + $i);
     }
