@@ -1,11 +1,11 @@
 <?php
 
-function get_teams_info($teams, $current_week)
+function fs_get_teams_info($teams, $current_week)
 {
     $teams_info = [];
 
     foreach ($teams as $team) {
-        $teams_info[] = get_team_info($team, $current_week);
+        $teams_info[] = fs_get_team_info($team, $current_week);
     }
 
     array_multisort(
@@ -17,7 +17,7 @@ function get_teams_info($teams, $current_week)
     return $teams_info;
 }
 
-function get_team_info($team, $current_week)
+function fs_get_team_info($team, $current_week)
 {
     $info = [
         'post' => $team,

@@ -39,7 +39,8 @@ jQuery(document).ready(function($) {
 
     $(".play_all_games").click(function(e) {
         let data = {
-            action: 'fs_play_all_games'
+            action: 'fs_play_all_games',
+            current_week: $('.current_week').val()
         };
 
         jQuery.ajax({

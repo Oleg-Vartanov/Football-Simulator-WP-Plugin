@@ -83,7 +83,7 @@
 
                 <tbody>
                 <?php
-                $teams_info = get_teams_info($current_teams, $current_week);
+                $teams_info = fs_get_teams_info($current_teams, $current_week);
                 foreach ($teams_info as $i => $team_info) {
                 ?>
                 <tr>

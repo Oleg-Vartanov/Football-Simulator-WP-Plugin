@@ -144,13 +144,28 @@ function fs_start_tournament() {
     wp_die();
 }
 
+add_action( 'wp_ajax_fs_play_all_games', 'fs_play_all_games' );
+add_action( 'wp_ajax_nopriv_fs_play_all_games', 'fs_play_all_games' );
+function fs_play_all_games() {
+    $weekly_matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => 1
+    ]);
+    $weeks_remaining = ((count($weekly_matches) * 2) - 1) * 2;
+    for ($i = 1; $i <= $weeks_remaining; $i++) {
+        fs_simulate_matches($_POST['current_week'] + $i);
+    }
+}
+
 add_action( 'wp_ajax_fs_start_week', 'fs_start_week' );
 add_action( 'wp_ajax_nopriv_fs_start_week', 'fs_start_week' );
 function fs_start_week() {
-    simulate_matches($_POST['current_week'] + 1);
+    fs_simulate_matches($_POST['current_week'] + 1);
 }
 
-function simulate_matches($week) {
+function fs_simulate_matches($week) {
     $url = wp_get_referer();
     $tournament_post_id = url_to_postid($url);
     $tournament_post = get_post($tournament_post_id);
@@ -163,13 +178,13 @@ function simulate_matches($week) {
     ]);
 
     foreach ($matches as $match) {
-        simulate_match($match);
+        fs_simulate_match($match);
     }
 
     update_post_meta($tournament_post_id, 'tour_current_week', $tournament_post->tour_current_week + 1);
 }
 
-function simulate_match($match) {
+function fs_simulate_match($match) {
     $home_team = get_post($match->match_home_team);
     $away_team = get_post($match->match_away_team);
 
@@ -183,10 +198,10 @@ function simulate_match($match) {
     $away_team_lvl = $away_team->team_level;
 
     for ($i = 1; $i < 6; $i++) {
-        if (try_to_score($home_team_lvl)) {
+        if (fs_try_to_score($home_team_lvl)) {
             $home_team_goals++;
         }
-        if (try_to_score($away_team_lvl)) {
+        if (fs_try_to_score($away_team_lvl)) {
             $away_team_goals++;
         }
         $home_team_lvl -= 20;
@@ -197,7 +212,7 @@ function simulate_match($match) {
     update_post_meta($match->ID, 'match_away_team_goals', $away_team_goals);
 }
 
-function try_to_score($skill_level) {
+function fs_try_to_score($skill_level) {
     $goal = false;
 
     if (rand(0, 100) <= $skill_level) {
