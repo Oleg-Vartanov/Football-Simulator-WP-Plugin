@@ -101,11 +101,7 @@ function fs_register_post_type_matches() {
 
 require __DIR__ . '/includes/fs-schedule-functions.php';
 
-add_action( 'wp_ajax_fs_select_teams', 'fs_select_teams' );
-add_action( 'wp_ajax_nopriv_fs_select_teams', 'fs_select_teams' );
-function fs_select_teams() {
-
-    // Removing old matches
+function fs_remove_old_matches() {
     $old_matches = get_posts([
         'post_type' => 'matches',
         'numberposts' => -1
@@ -113,6 +109,24 @@ function fs_select_teams() {
     foreach ($old_matches as $old_match) {
         wp_delete_post( $old_match->ID, true );
     }
+}
+
+add_action( 'wp_ajax_fs_reset_tournament', 'fs_reset_tournament' );
+add_action( 'wp_ajax_nopriv_fs_reset_tournament', 'fs_reset_tournament' );
+function fs_reset_tournament() {
+    fs_remove_old_matches();
+
+    $url = wp_get_referer();
+    $tournament_post_id = url_to_postid($url);
+    update_post_meta($tournament_post_id, 'tour_status', 'not_started');
+    update_post_meta($tournament_post_id, 'tour_current_week', 0);
+}
+
+add_action( 'wp_ajax_fs_start_tournament', 'fs_start_tournament' );
+add_action( 'wp_ajax_nopriv_fs_start_tournament', 'fs_start_tournament' );
+function fs_start_tournament() {
+
+    fs_remove_old_matches();
 
     // Creating new matches
     $args = [
@@ -122,5 +136,73 @@ function fs_select_teams() {
     $teams = get_posts($args);
     fs_create_matches($teams);
 
+    $url = wp_get_referer();
+    $tournament_post_id = url_to_postid($url);
+    update_post_meta($tournament_post_id, 'tour_status', 'in_progress');
+    update_post_meta($tournament_post_id, 'tour_current_week', 0);
+
     wp_die();
+}
+
+add_action( 'wp_ajax_fs_start_week', 'fs_start_week' );
+add_action( 'wp_ajax_nopriv_fs_start_week', 'fs_start_week' );
+function fs_start_week() {
+    simulate_matches($_POST['week']);
+}
+
+function simulate_matches($week) {
+    $url = wp_get_referer();
+    $tournament_post_id = url_to_postid($url);
+    $tournament_post = get_post($tournament_post_id);
+
+    $matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => $week
+    ]);
+
+    foreach ($matches as $match) {
+        simulate_match($match);
+    }
+
+    update_post_meta($tournament_post_id, 'tour_current_week', $tournament_post->tour_current_week + 1);
+}
+
+function simulate_match($match) {
+    $home_team = get_post($match->match_home_team);
+    $away_team = get_post($match->match_away_team);
+
+    if (!empty($match->match_home_team_goals) && !empty($match->match_away_team_goals)) {
+        return false;
+    }
+
+    $home_team_goals = 0;
+    $away_team_goals = 0;
+    $home_team_lvl = $home_team->team_level;
+    $away_team_lvl = $away_team->team_level;
+
+    for ($i = 1; $i < 6; $i++) {
+        if (try_to_score($home_team_lvl)) {
+            $home_team_goals++;
+        }
+        if (try_to_score($away_team_lvl)) {
+            $away_team_goals++;
+        }
+        $home_team_lvl -= 20;
+        $away_team_lvl -= 20;
+    }
+
+    update_post_meta($match->ID, 'match_home_team_goals', $home_team_goals);
+    update_post_meta($match->ID, 'match_away_team_goals', $away_team_goals);
+}
+
+function try_to_score($skill_level) {
+    $goal = false;
+
+    if (rand(0, 100) <= $skill_level) {
+        $goal = true;
+    }
+
+    return $goal;
 }
