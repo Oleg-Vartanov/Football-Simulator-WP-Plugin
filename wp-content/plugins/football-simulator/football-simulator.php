@@ -116,16 +116,14 @@ add_action( 'wp_ajax_nopriv_fs_reset_tournament', 'fs_reset_tournament' );
 function fs_reset_tournament() {
     fs_remove_old_matches();
 
-    $url = wp_get_referer();
-    $tournament_post_id = url_to_postid($url);
-    update_post_meta($tournament_post_id, 'tour_status', 'not_started');
-    update_post_meta($tournament_post_id, 'tour_current_week', 0);
+    $tournament_post = fs_get_post();
+    update_post_meta($tournament_post->ID, 'tour_status', 'not_started');
+    update_post_meta($tournament_post->ID, 'tour_current_week', 0);
 }
 
 add_action( 'wp_ajax_fs_start_tournament', 'fs_start_tournament' );
 add_action( 'wp_ajax_nopriv_fs_start_tournament', 'fs_start_tournament' );
 function fs_start_tournament() {
-
     fs_remove_old_matches();
 
     // Creating new matches
@@ -136,40 +134,72 @@ function fs_start_tournament() {
     $teams = get_posts($args);
     fs_create_matches($teams);
 
-    $url = wp_get_referer();
-    $tournament_post_id = url_to_postid($url);
-    update_post_meta($tournament_post_id, 'tour_status', 'in_progress');
-    update_post_meta($tournament_post_id, 'tour_current_week', 0);
+    $tournament_post = fs_get_post();
+    update_post_meta($tournament_post->ID, 'tour_status', 'in_progress');
+    update_post_meta($tournament_post->ID, 'tour_current_week', 0);
 
     wp_die();
 }
 
-add_action( 'wp_ajax_fs_play_all_games', 'fs_play_all_games' );
-add_action( 'wp_ajax_nopriv_fs_play_all_games', 'fs_play_all_games' );
-function fs_play_all_games() {
+function fs_get_remaining_weeks($current_week)
+{
     $weekly_matches = get_posts([
         'numberposts'   => -1,
         'post_type'     => 'matches',
         'meta_key'      => 'match_week',
         'meta_value'    => 1
     ]);
-    $weeks_remaining = ((count($weekly_matches) * 2) - 1) * 2 - $_POST['current_week'];
+    return ((count($weekly_matches) * 2) - 1) * 2 - $current_week;
+}
+
+add_action( 'wp_ajax_fs_play_all_games', 'fs_play_all_games' );
+add_action( 'wp_ajax_nopriv_fs_play_all_games', 'fs_play_all_games' );
+function fs_play_all_games() {
+    $response = [];
+    $weeks_remaining = fs_get_remaining_weeks($_POST['current_week']);
     for ($i = 1; $i <= $weeks_remaining; $i++) {
         fs_simulate_matches($_POST['current_week'] + $i);
+        $response[$i] = fs_get_updated_table_response();
     }
+    wp_send_json($response);
+    wp_die();
 }
 
 add_action( 'wp_ajax_fs_start_week', 'fs_start_week' );
 add_action( 'wp_ajax_nopriv_fs_start_week', 'fs_start_week' );
 function fs_start_week() {
     fs_simulate_matches($_POST['current_week'] + 1);
+    $table_response = fs_get_updated_table_response();
+    wp_send_json($table_response);
+    wp_die();
+}
+
+function fs_get_post() {
+    $url = wp_get_referer();
+    $post_id = url_to_postid($url);
+    return get_post($post_id);
+}
+
+function fs_get_updated_table_response() {
+    $table_response = ['tournament_status' => 'in_progress'];
+
+    ob_start();
+    $post = fs_get_post();
+    require __DIR__ . '/template-parts/content-page-tournament-table.php';
+    $table = ob_get_contents();
+    ob_end_clean();
+    $table_response['content'] = $table;
+    $table_response['current_week'] = $current_week;
+
+    $weeks_remaining = fs_get_remaining_weeks($current_week);
+    if ($weeks_remaining == 0) {
+        $table_response['tournament_status'] = 'completed';
+    }
+
+    return $table_response;
 }
 
 function fs_simulate_matches($week) {
-    $url = wp_get_referer();
-    $tournament_post_id = url_to_postid($url);
-    $tournament_post = get_post($tournament_post_id);
-
     $matches = get_posts([
         'numberposts'   => -1,
         'post_type'     => 'matches',
@@ -181,7 +211,11 @@ function fs_simulate_matches($week) {
         fs_simulate_match($match);
     }
 
-    update_post_meta($tournament_post_id, 'tour_current_week', $tournament_post->tour_current_week + 1);
+    $tournament_post = fs_get_post();
+    if (fs_get_remaining_weeks($week) == 0) {
+        update_post_meta($tournament_post->ID, 'tour_status', 'completed');
+    }
+    update_post_meta($tournament_post->ID, 'tour_current_week', $week);
 }
 
 function fs_simulate_match($match) {

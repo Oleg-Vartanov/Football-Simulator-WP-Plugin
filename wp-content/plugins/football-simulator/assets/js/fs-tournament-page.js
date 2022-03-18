@@ -31,8 +31,8 @@ jQuery(document).ready(function($) {
             url: '/wp-admin/admin-ajax.php',
             type: 'POST',
             data: data,
-            success: function (response) {
-                location.reload();
+            success: function (table_response) {
+                show_table(table_response);
             }
         });
     });
@@ -48,7 +48,9 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: data,
             success: function (response) {
-                location.reload();
+                $.each(response, function(i, table_response) {
+                    show_table(table_response);
+                });
             }
         });
     });
@@ -67,4 +69,13 @@ jQuery(document).ready(function($) {
             }
         });
     });
+
+    function show_table(table_response) {
+        if (table_response.tournament_status == 'completed') {
+            $('.next_week').hide();
+            $('.play_all_games').hide();
+        }
+        $('.current_week').val(table_response.current_week);
+        $('.tables-js').append(table_response.content);
+    }
 });
