@@ -1,0 +1,20 @@
+.goals {
+    width: 30px;
+    color: black;
+}
+
+.matches-row {
+    max-width:100%;
+    white-space:nowrap;
+}
+
+table {
+    background: rgba(0,0,0,0.8);
+    color: white;
+}
+
+body {
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+}

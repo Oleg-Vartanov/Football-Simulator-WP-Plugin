@@ -162,7 +162,7 @@ function fs_play_all_games() {
     $weeks_remaining = fs_get_remaining_weeks($_POST['current_week']);
     for ($i = 1; $i <= $weeks_remaining; $i++) {
         fs_simulate_matches($_POST['current_week'] + $i);
-        $response[$i] = fs_get_updated_table_response($_POST['current_week'] + 1);
+        $response[$i] = fs_get_updated_table_response($_POST['current_week'] + $i);
     }
     wp_send_json($response);
     wp_die();
@@ -183,7 +183,7 @@ function fs_get_post() {
     return get_post($post_id);
 }
 
-function fs_get_updated_table_response($current_week) {
+function fs_get_updated_table_response($week) {
     $table_response = ['tournament_status' => 'in_progress'];
 
     ob_start();
