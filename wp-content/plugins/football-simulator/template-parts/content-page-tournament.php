@@ -17,20 +17,16 @@
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
     <div class="entry-content">
+
         <?php
         the_content();
-
-        $all_teams = get_posts([
-            'post_type'   => 'teams',
-            'post_status' => 'publish'
-        ]);
-
-        $status = get_post_meta($post->ID, 'tour_status', true);
-        $current_week = get_post_meta($post->ID, 'tour_current_week', true);
+        $status = $post->tour_status;
+        $current_week = $post->tour_current_week;
         ?>
 
         <input type="hidden" class="current_week" value="<?php echo $current_week ?>">
 
+        <!-- Team Selection Screen -->
         <?php if ($status == 'not_started') { ?>
             <div class="container">
                 <div class="row">
@@ -39,6 +35,10 @@
                 <div class="row">
                     <select name="teams" class="team-select form-select" multiple>
                         <?php
+                        $all_teams = get_posts([
+                            'post_type'   => 'teams',
+                            'post_status' => 'publish'
+                        ]);
                         foreach ($all_teams as $team) {
                             echo '<option value="'. $team->ID .'">' . $team->post_title . '</option>';
                         }
@@ -49,15 +49,17 @@
                     <button class="btn btn-primary start-tournament"><?php echo __('Старт турнира', 'textdomain'); ?></button>
                 </div>
             </div>
+
+        <!-- Tournament Table Screen -->
         <?php } else { ?>
             <?php if ($status != 'completed') { ?>
-                <button class="btn btn-primary next_week"><?php echo __('Следующая неделя', 'textdomain'); ?></button>
-                <button type="button" class="btn btn-primary play_all_games"><?php echo __('Проиграть все матчи', 'textdomain'); ?></button>
+                <button class="btn btn-primary next_week">
+                    <?php echo __('Симулировать неделю', 'textdomain'); ?>
+                </button>
+                <button type="button" class="btn btn-primary play_all_games"><?php echo __('Симулировать весь турнир', 'textdomain'); ?></button>
             <?php } ?>
             <button type="button" class="btn btn-primary new_tournament"><?php echo __('Начать новый турнир', 'textdomain'); ?></button>
-            <div class="tables-js">
-                <?php include('content-page-tournament-table.php'); ?>
-            </div>
+            <div class="tables-js"></div>
         <?php } ?>
 
 

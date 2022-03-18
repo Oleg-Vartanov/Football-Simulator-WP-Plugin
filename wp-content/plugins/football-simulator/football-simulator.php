@@ -14,6 +14,9 @@ function fs_stylesheet()
     wp_enqueue_style('mypluginstylesheet');
     wp_register_style('prefix_bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
     wp_enqueue_style('prefix_bootstrap');
+
+    $plugin_url = plugin_dir_url( __FILE__ );
+    wp_enqueue_style( 'fs-styles', $plugin_url . 'assets/css/fs-styles.css' );
 }
 
 add_action('wp_print_scripts','fs_plugin_js');
@@ -159,7 +162,7 @@ function fs_play_all_games() {
     $weeks_remaining = fs_get_remaining_weeks($_POST['current_week']);
     for ($i = 1; $i <= $weeks_remaining; $i++) {
         fs_simulate_matches($_POST['current_week'] + $i);
-        $response[$i] = fs_get_updated_table_response();
+        $response[$i] = fs_get_updated_table_response($_POST['current_week'] + 1);
     }
     wp_send_json($response);
     wp_die();
@@ -169,7 +172,7 @@ add_action( 'wp_ajax_fs_start_week', 'fs_start_week' );
 add_action( 'wp_ajax_nopriv_fs_start_week', 'fs_start_week' );
 function fs_start_week() {
     fs_simulate_matches($_POST['current_week'] + 1);
-    $table_response = fs_get_updated_table_response();
+    $table_response = fs_get_updated_table_response($_POST['current_week'] + 1);
     wp_send_json($table_response);
     wp_die();
 }
@@ -180,18 +183,19 @@ function fs_get_post() {
     return get_post($post_id);
 }
 
-function fs_get_updated_table_response() {
+function fs_get_updated_table_response($current_week) {
     $table_response = ['tournament_status' => 'in_progress'];
 
     ob_start();
     $post = fs_get_post();
+    $current_week = $week; // $current_week required in content-page-tournament-table.php
     require __DIR__ . '/template-parts/content-page-tournament-table.php';
     $table = ob_get_contents();
     ob_end_clean();
     $table_response['content'] = $table;
-    $table_response['current_week'] = $current_week;
+    $table_response['current_week'] = $week;
 
-    $weeks_remaining = fs_get_remaining_weeks($current_week);
+    $weeks_remaining = fs_get_remaining_weeks($week);
     if ($weeks_remaining == 0) {
         $table_response['tournament_status'] = 'completed';
     }
@@ -246,7 +250,8 @@ function fs_simulate_match($match) {
     update_post_meta($match->ID, 'match_away_team_goals', $away_team_goals);
 }
 
-function fs_try_to_score($skill_level) {
+function fs_try_to_score($skill_level)
+{
     $goal = false;
 
     if (rand(0, 100) <= $skill_level) {
@@ -254,4 +259,36 @@ function fs_try_to_score($skill_level) {
     }
 
     return $goal;
+}
+
+add_action( 'wp_ajax_fs_edit_score', 'fs_edit_score' );
+add_action( 'wp_ajax_nopriv_fs_edit_score', 'fs_edit_score' );
+function fs_edit_score()
+{
+    if ($_POST['team'] == 'home') {
+        update_post_meta($_POST['match_id'], 'match_home_team_goals', $_POST['goals']);
+    } else if ($_POST['team'] == 'away') {
+        update_post_meta($_POST['match_id'], 'match_away_team_goals', $_POST['goals']);
+    }
+
+    $tournament_post = fs_get_post();
+    $response = [];
+    for ($week = 1; $week <= $tournament_post->tour_current_week; $week++) {
+        $response[$week] = fs_get_updated_table_response($week);
+    }
+    wp_send_json($response);
+    wp_die();
+}
+
+add_action( 'wp_ajax_fs_show_tables', 'fs_show_tables' );
+add_action( 'wp_ajax_nopriv_fs_show_tables', 'fs_show_tables' );
+function fs_show_tables()
+{
+    $tournament_post = fs_get_post();
+    $response = [];
+    for ($week = 1; $week <= $tournament_post->tour_current_week; $week++) {
+        $response[$week] = fs_get_updated_table_response($week);
+    }
+    wp_send_json($response);
+    wp_die();
 }
