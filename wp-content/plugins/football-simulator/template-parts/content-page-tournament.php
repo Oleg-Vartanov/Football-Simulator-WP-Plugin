@@ -20,17 +20,15 @@
 
         <?php
         the_content();
-        $status = $post->tour_status;
-        $current_week = $post->tour_current_week;
         ?>
 
-        <input type="hidden" class="current_week" value="<?php echo $current_week ?>">
+        <input type="hidden" class="current_week" value="<?php echo $post->tour_current_week ?>">
 
         <!-- Team Selection Screen -->
-        <?php if ($status == 'not_started') { ?>
+        <?php if ($post->tour_status == 'not_started') { ?>
             <div class="container">
                 <div class="row">
-                    <label for="team-select">Select 4 teams:</label>
+                    <label for="team-select"><?php echo __('Выбрать 4 команды', 'textdomain'); ?>:</label>
                 </div>
                 <div class="row">
                     <select name="teams" class="team-select form-select" multiple>
@@ -52,7 +50,7 @@
 
         <!-- Tournament Table Screen -->
         <?php } else { ?>
-            <?php if ($status != 'completed') { ?>
+            <?php if ($post->tour_status != 'completed') { ?>
                 <button class="btn btn-primary next_week">
                     <?php echo __('Симулировать неделю', 'textdomain'); ?>
                 </button>

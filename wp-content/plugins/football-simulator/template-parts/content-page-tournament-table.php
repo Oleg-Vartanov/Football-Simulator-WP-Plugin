@@ -1,16 +1,9 @@
 <?php
-    $current_teams = [];
-    $current_week_matches = get_posts([
-        'numberposts'   => -1,
-        'post_type'     => 'matches',
-        'meta_key'      => 'match_week',
-        'meta_value'    => $current_week
-    ]);
-    foreach ($current_week_matches as $current_week_match) {
-        $current_teams[] = get_post($current_week_match->match_home_team);
-        $current_teams[] = get_post($current_week_match->match_away_team);
-    }
-    $teams_info = fs_get_teams_info($current_teams, $current_week);
+/**
+ * @var array $teams_info Team's info in a current's week table
+ * @var int $current_week
+ * @var array<WP_Post> $current_week_matches
+ */
 ?>
 
 <table class="table">
@@ -38,13 +31,10 @@
             <td><?php echo $team_info['l'] ?></td>
             <td><?php echo $team_info['goad_diff'] ?></td>
             <?php if ($i == 0) { ?>
-            <td class="matches-row" rowspan="<?php echo count($current_teams); ?>">
-                <?php foreach ($current_week_matches as $match) {
-                    $home_team = get_post($match->match_home_team);
-                    $away_team = get_post($match->match_away_team);
-                    ?>
+            <td class="matches-row" rowspan="<?php echo count($teams_info); ?>">
+                <?php foreach ($current_week_matches as $match) { ?>
                     <p>
-                    <?php echo $home_team->post_title; ?>
+                    <?php echo get_the_title($match->match_home_team); ?>
                         <input class="goals"
                                data-team="home"
                                data-match-id="<?php echo $match->ID; ?>"
@@ -54,7 +44,7 @@
                                data-team="away"
                                data-match-id="<?php echo $match->ID; ?>"
                                value="<?php echo $match->match_away_team_goals; ?>">
-                         <?php echo $away_team->post_title; ?>
+                        <?php echo get_the_title($match->match_away_team); ?>
                     </p>
                 <?php } ?>
             </td>

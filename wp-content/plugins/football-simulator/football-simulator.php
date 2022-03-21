@@ -188,15 +188,30 @@ function fs_get_updated_table_response($week) {
 
     ob_start();
     $post = fs_get_post();
-    $current_week = $week; // $current_week required in content-page-tournament-table.php
+
+    // Data for content-page-tournament-table.php
+    $current_week = $week;
+    $current_week_matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => $current_week
+    ]);
+    $current_teams = [];
+    foreach ($current_week_matches as $current_week_match) {
+        $current_teams[] = get_post($current_week_match->match_home_team);
+        $current_teams[] = get_post($current_week_match->match_away_team);
+    }
+    $teams_info = fs_get_teams_info($current_teams, $current_week);
+
     require __DIR__ . '/template-parts/content-page-tournament-table.php';
+
     $table = ob_get_contents();
     ob_end_clean();
+
     $table_response['content'] = $table;
     $table_response['current_week'] = $week;
-
-    $weeks_remaining = fs_get_remaining_weeks($week);
-    if ($weeks_remaining == 0) {
+    if (fs_get_remaining_weeks($week) == 0) {
         $table_response['tournament_status'] = 'completed';
     }
 
