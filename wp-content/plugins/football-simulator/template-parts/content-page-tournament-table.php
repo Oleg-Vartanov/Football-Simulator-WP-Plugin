@@ -5,7 +5,6 @@
  * @var array<WP_Post> $current_week_matches
  */
 ?>
-
 <table class="table">
     <thead>
     <tr>

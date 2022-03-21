@@ -12,6 +12,12 @@
 
 get_header();
 
+$all_teams = get_posts([
+    'post_type'   => 'teams',
+    'post_status' => 'publish'
+]);
+$thumb = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full')['0'];
+
 /* Start the Loop */
 while (have_posts()) :
     the_post();

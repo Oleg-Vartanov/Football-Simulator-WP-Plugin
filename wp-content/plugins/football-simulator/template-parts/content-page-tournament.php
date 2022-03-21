@@ -1,12 +1,7 @@
 <?php
 /**
- * Template part for displaying page content in page.php
- *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
- *
- * @package WordPress
- * @subpackage Twenty_Twenty_One
- * @since Twenty Twenty-One 1.0
+ * @var array<WP_Post> $all_teams All teams posts
+ * @var string $thumb Background image
  */
 ?>
 
@@ -32,12 +27,7 @@
                 </div>
                 <div class="row">
                     <select name="teams" class="team-select form-select" multiple>
-                        <?php
-                        $all_teams = get_posts([
-                            'post_type'   => 'teams',
-                            'post_status' => 'publish'
-                        ]);
-                        foreach ($all_teams as $team) {
+                        <?php foreach ($all_teams as $team) {
                             echo '<option value="'. $team->ID .'">' . $team->post_title . '</option>';
                         }
                         ?>
@@ -65,9 +55,8 @@
 
 </article><!-- #post-<?php the_ID(); ?> -->
 
-<?php $thumb = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full'); ?>
 <style>
     body {
-        background-image: url('<?php echo $thumb['0'];?>');
+        background-image: url('<?php echo $thumb;?>');
     }
 </style>
