@@ -29,7 +29,7 @@
             <td><?php echo $team_info['d'] ?></td>
             <td><?php echo $team_info['l'] ?></td>
             <td><?php echo $team_info['goad_diff'] ?></td>
-            <?php if ($i == 0) { ?>
+            <?php if ($current_week != 0 && $i == 0) { ?>
             <td class="matches-row" rowspan="<?php echo count($teams_info); ?>">
                 <?php foreach ($current_week_matches as $match) { ?>
                     <p>

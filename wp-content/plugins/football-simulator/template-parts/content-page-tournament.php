@@ -47,7 +47,11 @@
                 <button type="button" class="btn btn-primary play_all_games"><?php echo __('Симулировать весь турнир', 'textdomain'); ?></button>
             <?php } ?>
             <button type="button" class="btn btn-primary new_tournament"><?php echo __('Начать новый турнир', 'textdomain'); ?></button>
-            <div class="tables-js"></div>
+            <div class="tables-js">
+                <?php if ($post->tour_current_week == 0) {
+                    require __DIR__ . '/content-page-tournament-table.php';
+                } ?>
+            </div>
         <?php } ?>
 
 
