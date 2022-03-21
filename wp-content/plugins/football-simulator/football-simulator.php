@@ -292,7 +292,6 @@ function fs_edit_score()
         $response[$week] = fs_get_updated_table_response($week);
     }
     wp_send_json($response);
-    wp_die();
 }
 
 add_action( 'wp_ajax_fs_show_tables', 'fs_show_tables' );
