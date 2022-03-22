@@ -19,9 +19,9 @@
 
         <?php if ($post->tour_status == 'in_progress') { ?>
             <button class="btn btn-primary next_week">
-                <?php echo __('Симулировать неделю', 'textdomain'); ?>
+                <?php echo __('Сгенерировать неделю', 'textdomain'); ?>
             </button>
-            <button type="button" class="btn btn-primary play_all_games"><?php echo __('Симулировать весь турнир', 'textdomain'); ?></button>
+            <button type="button" class="btn btn-primary play_all_games"><?php echo __('Сгенерировать весь турнир', 'textdomain'); ?></button>
         <?php } ?>
         <?php if ($post->tour_status != 'not_started') { ?>
             <button type="button" class="btn btn-primary new_tournament"><?php echo __('Начать новый турнир', 'textdomain'); ?></button>
