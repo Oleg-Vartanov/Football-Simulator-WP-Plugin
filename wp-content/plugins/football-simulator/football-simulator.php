@@ -165,7 +165,6 @@ function fs_play_all_games() {
         $response[$i] = fs_get_updated_table_response($_POST['current_week'] + $i);
     }
     wp_send_json($response);
-    wp_die();
 }
 
 add_action( 'wp_ajax_fs_start_week', 'fs_start_week' );
@@ -174,7 +173,6 @@ function fs_start_week() {
     fs_simulate_matches($_POST['current_week'] + 1);
     $table_response = fs_get_updated_table_response($_POST['current_week'] + 1);
     wp_send_json($table_response);
-    wp_die();
 }
 
 function fs_get_post() {
@@ -325,5 +323,4 @@ function fs_show_tables()
         $response[$week] = fs_get_updated_table_response($week);
     }
     wp_send_json($response);
-    wp_die();
 }
