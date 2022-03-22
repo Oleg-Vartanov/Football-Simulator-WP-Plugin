@@ -16,16 +16,17 @@
         <?php the_content(); ?>
 
         <input type="hidden" class="current_week" value="<?php echo $post->tour_current_week ?>">
+        <input type="hidden" class="current_status" value="<?php echo $post->tour_status ?>">
 
-        <?php if ($post->tour_status == 'in_progress') { ?>
-            <button class="btn btn-primary next_week">
+            <button class="btn btn-primary next_week" style="display: none;">
                 <?php echo __('Сгенерировать неделю', 'textdomain'); ?>
             </button>
-            <button type="button" class="btn btn-primary play_all_games"><?php echo __('Сгенерировать весь турнир', 'textdomain'); ?></button>
-        <?php } ?>
-        <?php if ($post->tour_status != 'not_started') { ?>
-            <button type="button" class="btn btn-primary new_tournament"><?php echo __('Начать новый турнир', 'textdomain'); ?></button>
-        <?php } ?>
+            <button type="button" class="btn btn-primary play_all_games" style="display: none;">
+                <?php echo __('Сгенерировать весь турнир', 'textdomain'); ?>
+            </button>
+            <button type="button"class="btn btn-primary new_tournament" style="display: none;">
+                <?php echo __('Начать новый турнир', 'textdomain'); ?>
+            </button>
         <div class="tables-js">
             <?php if ($post->tour_status == 'not_started') {
                 require __DIR__ . '/content-page-tournament-team-select.php';

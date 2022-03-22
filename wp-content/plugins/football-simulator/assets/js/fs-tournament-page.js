@@ -1,4 +1,6 @@
 jQuery(document).ready(function($) {
+    toggle_buttons($('.current_status').val());
+
     jQuery.ajax({
         url: '/wp-admin/admin-ajax.php',
         type: 'POST',
