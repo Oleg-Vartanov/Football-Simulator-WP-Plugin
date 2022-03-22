@@ -204,6 +204,15 @@ function fs_get_updated_table_response($week) {
     }
     $teams_info = fs_get_teams_info($current_teams, $current_week);
 
+    // Calculate winning probabilities
+    if ($current_week >= 4 && $current_week < (count($current_teams) - 1) * 2) {
+        require_once('includes/ProbabilityCalculator.php');
+        $pr = new ProbabilityCalculator($teams_info, $current_week);
+        $winning_probabilities = $pr->getWinProbabilities();
+    }
+
+    $teams_info = fs_get_sorted_table_info($teams_info);
+
     require __DIR__ . '/template-parts/content-page-tournament-table.php';
 
     $table = ob_get_contents();
@@ -216,6 +225,18 @@ function fs_get_updated_table_response($week) {
     }
 
     return $table_response;
+}
+
+function fs_get_sorted_table_info($teams_info) {
+    array_multisort(
+        array_column($teams_info, 'pts'), SORT_DESC,
+        array_column($teams_info, 'goad_diff'), SORT_DESC,
+        array_column($teams_info, 'scored'), SORT_DESC,
+        array_column($teams_info, 'conceded'), SORT_DESC,
+        $teams_info
+    );
+
+    return $teams_info;
 }
 
 function fs_simulate_matches($week) {

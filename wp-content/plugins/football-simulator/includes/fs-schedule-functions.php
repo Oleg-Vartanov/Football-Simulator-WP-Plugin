@@ -5,14 +5,8 @@ function fs_get_teams_info($teams, $current_week)
     $teams_info = [];
 
     foreach ($teams as $team) {
-        $teams_info[] = fs_get_team_info($team, $current_week);
+        $teams_info[$team->ID] = fs_get_team_info($team, $current_week);
     }
-
-    array_multisort(
-        array_column($teams_info, 'pts'), SORT_DESC,
-        array_column($teams_info, 'goad_diff'), SORT_DESC,
-        $teams_info
-    );
 
     return $teams_info;
 }

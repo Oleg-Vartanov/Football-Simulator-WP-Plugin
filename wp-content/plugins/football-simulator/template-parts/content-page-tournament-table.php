@@ -16,6 +16,9 @@
         <th scope="col">L</th>
         <th scope="col">GD</th>
         <th scope="col"><?php echo __('Результаты матчей', 'textdomain'); ?></th>
+        <?php if ($current_week >=4 && $current_week < (count($teams_info) - 1) * 2) { ?>
+        <th scope="col"><?php echo __('Предсказание победителя после недели', 'textdomain') . ' ' . $current_week; ?></th>
+        <?php } ?>
     </tr>
     </thead>
 
@@ -45,6 +48,13 @@
                                value="<?php echo $match->match_away_team_goals; ?>">
                         <?php echo get_the_title($match->match_away_team); ?>
                     </p>
+                <?php } ?>
+            </td>
+            <?php } ?>
+            <?php if (!empty($winning_probabilities) && $i == 0) { ?>
+            <td class="matches-row" rowspan="<?php echo count($teams_info); ?>">
+                <?php foreach ($winning_probabilities as $team_id => $winning_probability) { ?>
+                    <p><?php echo get_the_title($team_id) . ' - ' . round($winning_probability, 2); ?> %</p>
                 <?php } ?>
             </td>
             <?php } ?>
