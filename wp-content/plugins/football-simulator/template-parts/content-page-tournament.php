@@ -17,13 +17,15 @@
 
         <input type="hidden" class="current_week" value="<?php echo $post->tour_current_week ?>">
 
-        <?php if ($post->tour_status != 'completed') { ?>
+        <?php if ($post->tour_status == 'in_progress') { ?>
             <button class="btn btn-primary next_week">
                 <?php echo __('Симулировать неделю', 'textdomain'); ?>
             </button>
             <button type="button" class="btn btn-primary play_all_games"><?php echo __('Симулировать весь турнир', 'textdomain'); ?></button>
         <?php } ?>
-        <button type="button" class="btn btn-primary new_tournament"><?php echo __('Начать новый турнир', 'textdomain'); ?></button>
+        <?php if ($post->tour_status != 'not_started') { ?>
+            <button type="button" class="btn btn-primary new_tournament"><?php echo __('Начать новый турнир', 'textdomain'); ?></button>
+        <?php } ?>
         <div class="tables-js">
             <?php if ($post->tour_status == 'not_started') {
                 require __DIR__ . '/content-page-tournament-team-select.php';

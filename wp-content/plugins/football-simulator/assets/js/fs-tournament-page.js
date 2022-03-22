@@ -112,14 +112,22 @@ jQuery(document).ready(function($) {
     });
 
     function add_content_to_tables(response) {
-        if (response.tournament_status == 'completed' || response.tournament_status == 'not_started') {
+        toggle_buttons(response.tournament_status);
+        $('.current_week').val(response.current_week);
+        $('.tables-js').append(response.content);
+    }
+
+    function toggle_buttons(tournament_status) {
+        if (tournament_status != 'in_progress') {
             $('.next_week').hide();
             $('.play_all_games').hide();
         } else {
             $('.next_week').show();
             $('.play_all_games').show();
+            $('.new_tournament').show();
         }
-        $('.current_week').val(response.current_week);
-        $('.tables-js').append(response.content);
+        if (tournament_status == 'not_started') {
+            $('.new_tournament').hide();
+        }
     }
 });

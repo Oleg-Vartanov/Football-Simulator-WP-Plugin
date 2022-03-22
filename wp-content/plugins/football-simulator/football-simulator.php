@@ -159,7 +159,13 @@ function fs_start_tournament() {
     ob_start();
     // Data for content-page-tournament-table.php
     $current_week = 0;
-    $teams_info = fs_get_teams_info($current_week);
+    $current_week_matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => 1 // Take a first week
+    ]);
+    $teams_info = fs_get_teams_info($current_week_matches, $current_week);
     require __DIR__ . '/template-parts/content-page-tournament-table.php';
     $table = ob_get_contents();
     ob_end_clean();
@@ -176,7 +182,7 @@ function fs_get_remaining_weeks($current_week)
         'numberposts'   => -1,
         'post_type'     => 'matches',
         'meta_key'      => 'match_week',
-        'meta_value'    => 1
+        'meta_value'    => 1 // Take a first week
     ]);
     return ((count($weekly_matches) * 2) - 1) * 2 - $current_week;
 }
@@ -215,7 +221,13 @@ function fs_get_updated_table_response($week) {
 
     // Data for content-page-tournament-table.php
     $current_week = $week;
-    $teams_info = fs_get_teams_info($current_week);
+    $current_week_matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => $current_week
+    ]);
+    $teams_info = fs_get_teams_info($current_week_matches, $current_week);
 
     // Calculate winning probabilities
     if ($current_week >= 4 && $current_week < (count($teams_info) - 1) * 2) {

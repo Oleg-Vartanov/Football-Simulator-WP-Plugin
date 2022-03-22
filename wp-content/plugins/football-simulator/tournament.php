@@ -17,8 +17,18 @@ $all_teams = get_posts([
     'post_status' => 'publish'
 ]);
 $thumb = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full')['0'];
-$current_week = $post->tour_current_week;
-$teams_info = fs_get_teams_info($current_week);
+
+if ($post->tour_status == 'in_progress') {
+    $current_week = $post->tour_current_week;
+    $current_week_matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => 1 // Take a first week
+    ]);
+    $teams_info = fs_get_teams_info($current_week_matches, $current_week);
+}
+
 
 /* Start the Loop */
 while (have_posts()) :
