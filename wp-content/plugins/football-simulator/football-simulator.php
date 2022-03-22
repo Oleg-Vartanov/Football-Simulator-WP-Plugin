@@ -122,6 +122,20 @@ function fs_reset_tournament() {
     $tournament_post = fs_get_post();
     update_post_meta($tournament_post->ID, 'tour_status', 'not_started');
     update_post_meta($tournament_post->ID, 'tour_current_week', 0);
+
+    $response['tournament_status'] = 'not_started';
+    $response['current_week'] = 0;
+
+    ob_start();
+    $all_teams = get_posts([
+        'post_type'   => 'teams',
+        'post_status' => 'publish'
+    ]);
+    require __DIR__ . '/template-parts/content-page-tournament-team-select.php';
+    $response['content'] = ob_get_contents();
+    ob_end_clean();
+
+    wp_send_json($response);
 }
 
 add_action( 'wp_ajax_fs_start_tournament', 'fs_start_tournament' );
@@ -141,7 +155,19 @@ function fs_start_tournament() {
     update_post_meta($tournament_post->ID, 'tour_status', 'in_progress');
     update_post_meta($tournament_post->ID, 'tour_current_week', 0);
 
-    wp_die();
+    $response = ['tournament_status' => 'in_progress'];
+    ob_start();
+    // Data for content-page-tournament-table.php
+    $current_week = 0;
+    $teams_info = fs_get_teams_info($current_week);
+    require __DIR__ . '/template-parts/content-page-tournament-table.php';
+    $table = ob_get_contents();
+    ob_end_clean();
+
+    $response['content'] = $table;
+    $response['current_week'] = 0;
+
+    wp_send_json($response);
 }
 
 function fs_get_remaining_weeks($current_week)
@@ -189,21 +215,10 @@ function fs_get_updated_table_response($week) {
 
     // Data for content-page-tournament-table.php
     $current_week = $week;
-    $current_week_matches = get_posts([
-        'numberposts'   => -1,
-        'post_type'     => 'matches',
-        'meta_key'      => 'match_week',
-        'meta_value'    => $current_week
-    ]);
-    $current_teams = [];
-    foreach ($current_week_matches as $current_week_match) {
-        $current_teams[] = get_post($current_week_match->match_home_team);
-        $current_teams[] = get_post($current_week_match->match_away_team);
-    }
-    $teams_info = fs_get_teams_info($current_teams, $current_week);
+    $teams_info = fs_get_teams_info($current_week);
 
     // Calculate winning probabilities
-    if ($current_week >= 4 && $current_week < (count($current_teams) - 1) * 2) {
+    if ($current_week >= 4 && $current_week < (count($teams_info) - 1) * 2) {
         require_once('includes/ProbabilityCalculator.php');
         $pr = new ProbabilityCalculator($teams_info, $current_week);
         $winning_probabilities = $pr->getWinProbabilities();

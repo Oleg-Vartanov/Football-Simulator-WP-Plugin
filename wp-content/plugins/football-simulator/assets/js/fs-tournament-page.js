@@ -4,9 +4,11 @@ jQuery(document).ready(function($) {
         type: 'POST',
         data: { action: 'fs_show_tables' },
         success: function (response) {
-            $.each(response, function(i, table_response) {
-                show_table(table_response);
-            });
+            if ($('.current_week').val() != 0) {
+                $.each(response, function (i, table_response) {
+                    add_content_to_tables(table_response);
+                });
+            }
         }
     });
 
@@ -30,13 +32,13 @@ jQuery(document).ready(function($) {
             success: function (response) {
                 $('.tables-js').empty();
                 $.each(response, function(i, table_response) {
-                    show_table(table_response);
+                    add_content_to_tables(table_response);
                 });
             }
         });
     });
 
-    $(".start-tournament").click(function(e) {
+    $(document).on('click', '.start-tournament', function() {
         if ($("select option:selected").length != 4) {
             $(".team-select").val("");
             alert('Необходимо выбрать 4 команды');
@@ -53,7 +55,24 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: data,
             success: function (response) {
-                location.reload();
+                $('.tables-js').empty();
+                add_content_to_tables(response);
+            }
+        });
+    });
+
+    $(".new_tournament").click(function(e) {
+        let data = {
+            action: 'fs_reset_tournament'
+        };
+
+        jQuery.ajax({
+            url: '/wp-admin/admin-ajax.php',
+            type: 'POST',
+            data: data,
+            success: function (response) {
+                $('.tables-js').empty();
+                add_content_to_tables(response);
             }
         });
     });
@@ -69,7 +88,7 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: data,
             success: function (table_response) {
-                show_table(table_response);
+                add_content_to_tables(table_response);
             }
         });
     });
@@ -86,33 +105,21 @@ jQuery(document).ready(function($) {
             data: data,
             success: function (response) {
                 $.each(response, function(i, table_response) {
-                    show_table(table_response);
+                    add_content_to_tables(table_response);
                 });
             }
         });
     });
 
-    $(".new_tournament").click(function(e) {
-        let data = {
-            action: 'fs_reset_tournament'
-        };
-
-        jQuery.ajax({
-            url: '/wp-admin/admin-ajax.php',
-            type: 'POST',
-            data: data,
-            success: function (response) {
-                location.reload();
-            }
-        });
-    });
-
-    function show_table(table_response) {
-        if (table_response.tournament_status == 'completed') {
+    function add_content_to_tables(response) {
+        if (response.tournament_status == 'completed' || response.tournament_status == 'not_started') {
             $('.next_week').hide();
             $('.play_all_games').hide();
+        } else {
+            $('.next_week').show();
+            $('.play_all_games').show();
         }
-        $('.current_week').val(table_response.current_week);
-        $('.tables-js').append(table_response.content);
+        $('.current_week').val(response.current_week);
+        $('.tables-js').append(response.content);
     }
 });

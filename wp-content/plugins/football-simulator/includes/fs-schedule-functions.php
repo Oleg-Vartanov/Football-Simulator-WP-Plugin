@@ -1,9 +1,21 @@
 <?php
 
-function fs_get_teams_info($teams, $current_week)
+function fs_get_teams_info($current_week)
 {
-    $teams_info = [];
+    // Collect matches of the first week
+    $current_week_matches = get_posts([
+        'numberposts'   => -1,
+        'post_type'     => 'matches',
+        'meta_key'      => 'match_week',
+        'meta_value'    => 1
+    ]);
+    $teams = [];
+    foreach ($current_week_matches as $current_week_match) {
+        $teams[] = get_post($current_week_match->match_home_team);
+        $teams[] = get_post($current_week_match->match_away_team);
+    }
 
+    $teams_info = [];
     foreach ($teams as $team) {
         $teams_info[$team->ID] = fs_get_team_info($team, $current_week);
     }
