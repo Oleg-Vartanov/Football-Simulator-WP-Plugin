@@ -1,79 +1,45 @@
 <?php
 /**
- * Template part for displaying page content in page.php
- *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
- *
- * @package WordPress
- * @subpackage Twenty_Twenty_One
- * @since Twenty Twenty-One 1.0
+ * @var array<WP_Post> $all_teams All teams posts
+ * @var string $thumb Background image
  */
 ?>
+
+<script>
+    <?php include WP_PLUGIN_DIR . '/football-simulator/assets/js/fs-tournament-page.js';?>
+</script>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
     <div class="entry-content">
-        <?php
-        the_content();
 
-        $teams = get_posts([
-            'post_type'   => 'teams',
-            'post_status' => 'publish'
-        ]);
-        ?>
+        <?php the_content(); ?>
 
-        <script>
-            jQuery(document).ready(function($) {
-                $("#next_week").click(function(e) {
-                    if ($("select option:selected").length != 4) {
-                        $("#team-select").val("");
-                        alert('4 Teams must me selected');
-                        return false;
-                    }
+        <input type="hidden" class="current_week" value="<?php echo $post->tour_current_week ?>">
+        <input type="hidden" class="current_status" value="<?php echo $post->tour_status ?>">
 
-                    let data = {
-                        action: 'fs_select_teams',
-                        team_ids: $('#team-select').val()
-                    };
-
-                    jQuery.ajax({
-                        url: '/wp-admin/admin-ajax.php',
-                        type: 'POST',
-                        data: data,
-                        success: function (response) {
-                            return false;
-                            console.log( response );
-                        }
-                    });
-                });
-            });
-        </script>
-
-            <div class="container">
-                <div class="row">
-                    <label for="team-select">Select 4 teams:</label>
-                </div>
-                <div class="row">
-                    <select name="teams" id="team-select" class="form-select" multiple>
-                        <?php
-                        foreach ($teams as $team) {
-                            echo '<option value="'. $team->ID .'">' . $team->post_title . '</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="row">
-                    <button id="next_week" class="btn btn-primary">Следующая неделя</button>
-                    <button id="play_all_games" type="button" class="btn btn-primary">Проиграть все матчи</button>
-                </div>
-            </div>
+            <button class="btn btn-primary next_week" style="display: none;">
+                <?php echo __('Сгенерировать неделю', 'textdomain'); ?>
+            </button>
+            <button type="button" class="btn btn-primary play_all_games" style="display: none;">
+                <?php echo __('Сгенерировать весь турнир', 'textdomain'); ?>
+            </button>
+            <button type="button"class="btn btn-primary new_tournament" style="display: none;">
+                <?php echo __('Начать новый турнир', 'textdomain'); ?>
+            </button>
+        <div class="tables-js">
+            <?php if ($post->tour_status == 'not_started') {
+                require __DIR__ . '/content-page-tournament-team-select.php';
+            } elseif ($post->tour_current_week == 0) {
+                require __DIR__ . '/content-page-tournament-table.php';
+            } ?>
+        </div>
     </div><!-- .entry-content -->
 
 </article><!-- #post-<?php the_ID(); ?> -->
 
-<?php $thumb = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full'); ?>
 <style>
     body {
-        background-image: url('<?php echo $thumb['0'];?>');
+        background-image: url('<?php echo $thumb;?>');
     }
 </style>
