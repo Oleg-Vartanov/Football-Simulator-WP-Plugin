@@ -29,62 +29,51 @@ function fs_get_team_info($team, $current_week)
         'goad_diff' => 0,
     ];
 
-    $home_matches = get_posts([
+    $matches = get_posts([
         'numberposts' => -1,
         'post_type' => 'matches',
         'meta_query' => [
             'relation' => 'AND',
             [
-                'key' => 'match_home_team',
-                'compare' => '=',
-                'value' => $team->ID,
-            ],
-            [
                 'key' => 'match_week',
                 'compare' => '<=',
                 'value' => $current_week,
-            ]
-        ]
-    ]);
-    $away_matches = get_posts([
-        'numberposts' => -1,
-        'post_type' => 'matches',
-        'meta_query' => [
-            'relation' => 'AND',
-            [
-                'key' => 'match_away_team',
-                'compare' => '=',
-                'value' => $team->ID,
             ],
             [
-                'key' => 'match_week',
-                'compare' => '<=',
-                'value' => $current_week,
+                'relation' => 'OR',
+                [
+                    'key' => 'match_home_team',
+                    'compare' => '=',
+                    'value' => $team->ID,
+                ],
+                [
+                    'key' => 'match_away_team',
+                    'compare' => '=',
+                    'value' => $team->ID,
+                ]
+
             ]
         ]
     ]);
 
-    foreach ($home_matches as $home_match) {
-        $info['scored'] += $home_match->match_home_team_goals;
-        $info['conceded'] += $home_match->match_away_team_goals;
-        if ($home_match->match_home_team_goals > $home_match->match_away_team_goals) {
-            $info['w']++;
-            $info['pts'] += 3;
-        } else if ($home_match->match_home_team_goals == $home_match->match_away_team_goals) {
-            $info['d']++;
-            $info['pts'] += 1;
+    foreach ($matches as $match) {
+
+        // Counting goals considering it's home or away
+        if ($match->match_home_team_goals == $team->ID) {
+            $scored = $match->match_home_team_goals;
+            $conceded = $match->match_away_team_goals;
         } else {
-            $info['l']++;
+            $scored = $match->match_away_team_goals;
+            $conceded = $match->match_home_team_goals;
         }
+        $info['scored'] += $scored;
+        $info['conceded'] += $conceded;
 
-    }
-    foreach ($away_matches as $away_match) {
-        $info['scored'] += $away_match->match_away_team_goals;
-        $info['conceded'] += $away_match->match_home_team_goals;
-        if ($away_match->match_home_team_goals < $away_match->match_away_team_goals) {
+        // Adding points
+        if ($scored > $conceded) {
             $info['w']++;
             $info['pts'] += 3;
-        } else if ($away_match->match_home_team_goals == $away_match->match_away_team_goals) {
+        } else if ($scored == $conceded) {
             $info['d']++;
             $info['pts'] += 1;
         } else {
