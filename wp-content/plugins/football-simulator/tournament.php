@@ -29,7 +29,6 @@ if ($post->tour_status == 'in_progress') {
     $teams_info = fs_get_teams_info($current_week_matches, $current_week);
 }
 
-
 /* Start the Loop */
 while (have_posts()) :
     the_post();

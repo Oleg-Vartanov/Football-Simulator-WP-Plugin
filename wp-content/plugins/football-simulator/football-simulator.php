@@ -7,6 +7,8 @@
  * Domain Path:       /languages
  */
 
+include('includes/fs_constants.php');
+
 add_action( 'wp_print_styles', 'fs_stylesheet' );
 function fs_stylesheet()
 {
@@ -351,3 +353,36 @@ function fs_show_tables()
     }
     wp_send_json($response);
 }
+
+register_activation_hook( __FILE__, 'fs_plugin_activate' );
+function fs_plugin_activate() {
+    $teams = get_posts([
+        'post_type'   => 'teams',
+        'numberposts' => -1
+    ]);
+
+    if (empty(count($teams))) {
+        foreach (FS_INIT_TEAMS as $title => $skill_lvl)
+        wp_insert_post([
+            'post_title'  => $title,
+            'post_type'   => 'teams',
+            'post_status' => 'publish',
+            'meta_input'  => [
+                'team_level' => $skill_lvl
+            ]
+        ]);
+    }
+}
+
+register_uninstall_hook( __FILE__, 'fs_plugin_uninstall' );
+function fs_plugin_uninstall() {
+    $teams = get_posts([
+        'post_type'   => 'teams',
+        'numberposts' => -1
+    ]);
+
+    foreach ($teams as $team) {
+        wp_delete_post( $team->ID, true );
+    }
+}
+
