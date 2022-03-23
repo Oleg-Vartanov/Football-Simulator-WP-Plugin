@@ -386,3 +386,12 @@ function fs_plugin_uninstall() {
     }
 }
 
+add_filter( 'ocdi/import_files', 'ocdi_import_files' );
+function ocdi_import_files() {
+    return [
+        [
+            'import_file_name'             => 'Premier League Demo',
+            'local_import_file'            => __DIR__ . '/ocdi/demo-content.xml',
+        ]
+    ];
+}
