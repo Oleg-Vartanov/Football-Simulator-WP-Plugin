@@ -41,5 +41,9 @@
 <style>
     body {
         background-image: url('<?php echo $thumb;?>');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-size: cover;
     }
 </style>
