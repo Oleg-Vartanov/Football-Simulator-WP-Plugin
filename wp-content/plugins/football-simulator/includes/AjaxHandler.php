@@ -4,7 +4,31 @@ namespace FootballSimulator;
 
 class AjaxHandler {
 
-	static function resetTournament() {
+	private $simulator = [];
+
+	public function __construct() {
+		$this->simulator = new Simulator();
+
+		add_action( 'wp_ajax_fs_reset_tournament', [$this, 'resetTournament'] );
+		add_action( 'wp_ajax_nopriv_fs_reset_tournament', [$this, 'resetTournament'] );
+
+		add_action( 'wp_ajax_fs_start_tournament', [$this, 'startTournament'] );
+		add_action( 'wp_ajax_nopriv_fs_start_tournament', [$this, 'startTournament'] );
+
+		add_action( 'wp_ajax_fs_play_all_games', [$this, 'playAllGames'] );
+		add_action( 'wp_ajax_nopriv_fs_play_all_games', [$this, 'playAllGames'] );
+
+		add_action( 'wp_ajax_fs_start_week', [$this, 'startWeek'] );
+		add_action( 'wp_ajax_nopriv_fs_start_week', [$this, 'startWeek'] );
+
+		add_action( 'wp_ajax_fs_edit_score', [$this, 'editScore'] );
+		add_action( 'wp_ajax_nopriv_fs_edit_score', [$this, 'editScore'] );
+
+		add_action( 'wp_ajax_fs_show_tables', [$this, 'showTables'] );
+		add_action( 'wp_ajax_nopriv_fs_show_tables', [$this, 'showTables'] );
+	}
+
+	public function resetTournament() {
 		fs_remove_old_matches();
 
 		$tournament_post = fs_get_post();
@@ -26,7 +50,7 @@ class AjaxHandler {
 		wp_send_json( $response );
 	}
 
-	static function startTournament() {
+	public function startTournament() {
 		fs_remove_old_matches();
 
 		// Creating new matches
@@ -63,23 +87,23 @@ class AjaxHandler {
 		wp_send_json( $response );
 	}
 
-	static function playAllGames() {
+	public function playAllGames() {
 		$response        = [];
 		$weeks_remaining = fs_get_remaining_weeks( $_POST['current_week'] );
 		for ( $i = 1; $i <= $weeks_remaining; $i ++ ) {
-			fs_simulate_matches( $_POST['current_week'] + $i );
+			$this->simulator->simulateMatches( $_POST['current_week'] + $i );
 			$response[ $i ] = fs_get_updated_table_response( $_POST['current_week'] + $i );
 		}
 		wp_send_json( $response );
 	}
 
-	static function startWeek() {
-		fs_simulate_matches( $_POST['current_week'] + 1 );
+	public function startWeek() {
+		$this->simulator->simulateMatches( $_POST['current_week'] + 1 );
 		$table_response = fs_get_updated_table_response( $_POST['current_week'] + 1 );
 		wp_send_json( $table_response );
 	}
 
-	static function editScore() {
+	public function editScore() {
 		if ( $_POST['team'] == 'home' ) {
 			update_post_meta( $_POST['match_id'], 'match_home_team_goals', $_POST['goals'] );
 		} else if ( $_POST['team'] == 'away' ) {
@@ -94,7 +118,7 @@ class AjaxHandler {
 		wp_send_json( $response );
 	}
 
-	static function showTables() {
+	public function showTables() {
 		$tournament_post = fs_get_post();
 		$response        = [];
 		for ( $week = 1; $week <= $tournament_post->tour_current_week; $week ++ ) {

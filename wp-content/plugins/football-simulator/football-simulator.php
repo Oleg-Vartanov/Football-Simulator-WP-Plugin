@@ -10,6 +10,7 @@
 require 'includes/Scheduler.php';
 require 'includes/ProbabilityCalculator.php';
 require 'includes/AjaxHandler.php';
+require 'includes/Simulator.php';
 include 'includes/fs_constants.php';
 
 use FootballSimulator\Scheduler;
@@ -25,13 +26,6 @@ function fs_stylesheet()
 
     $plugin_url = plugin_dir_url( __FILE__ );
     wp_enqueue_style( 'fs-styles', $plugin_url . 'assets/css/fs-styles.css' );
-}
-
-add_action('wp_print_scripts','fs_plugin_js');
-function fs_plugin_js()
-{
-    wp_register_script('prefix_bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js');
-    wp_enqueue_script('prefix_bootstrap');
 }
 
 add_action( 'wp_enqueue_scripts', 'load_stylesheets' );
@@ -120,29 +114,6 @@ function fs_remove_old_matches() {
     }
 }
 
-
-//-----------------------------------------------------
-// Ajax actions
-//-----------------------------------------------------
-add_action( 'wp_ajax_fs_reset_tournament', ['\FootballSimulator\AjaxHandler', 'resetTournament'] );
-add_action( 'wp_ajax_nopriv_fs_reset_tournament', ['\FootballSimulator\AjaxHandler', 'resetTournament'] );
-
-add_action( 'wp_ajax_fs_start_tournament', ['\FootballSimulator\AjaxHandler', 'startTournament'] );
-add_action( 'wp_ajax_nopriv_fs_start_tournament', ['\FootballSimulator\AjaxHandler', 'startTournament'] );
-
-add_action( 'wp_ajax_fs_play_all_games', ['\FootballSimulator\AjaxHandler', 'playAllGames'] );
-add_action( 'wp_ajax_nopriv_fs_play_all_games', ['\FootballSimulator\AjaxHandler', 'playAllGames'] );
-
-add_action( 'wp_ajax_fs_start_week', ['\FootballSimulator\AjaxHandler', 'startWeek'] );
-add_action( 'wp_ajax_nopriv_fs_start_week', ['\FootballSimulator\AjaxHandler', 'startWeek'] );
-
-add_action( 'wp_ajax_fs_edit_score', ['\FootballSimulator\AjaxHandler', 'editScore'] );
-add_action( 'wp_ajax_nopriv_fs_edit_score', ['\FootballSimulator\AjaxHandler', 'editScore'] );
-
-add_action( 'wp_ajax_fs_show_tables', ['\FootballSimulator\AjaxHandler', 'showTables'] );
-add_action( 'wp_ajax_nopriv_fs_show_tables', ['\FootballSimulator\AjaxHandler', 'showTables'] );
-//-----------------------------------------------------
-
 function fs_get_remaining_weeks($current_week)
 {
 	$weekly_matches = get_posts([
@@ -199,64 +170,6 @@ function fs_get_updated_table_response($week) {
     return $table_response;
 }
 
-function fs_simulate_matches($week) {
-    $matches = get_posts([
-        'numberposts'   => -1,
-        'post_type'     => 'matches',
-        'meta_key'      => 'match_week',
-        'meta_value'    => $week
-    ]);
-
-    foreach ($matches as $match) {
-        fs_simulate_match($match);
-    }
-
-    $tournament_post = fs_get_post();
-    if (fs_get_remaining_weeks($week) == 0) {
-        update_post_meta($tournament_post->ID, 'tour_status', 'completed');
-    }
-    update_post_meta($tournament_post->ID, 'tour_current_week', $week);
-}
-
-function fs_simulate_match($match) {
-    $home_team = get_post($match->match_home_team);
-    $away_team = get_post($match->match_away_team);
-
-    if (!empty($match->match_home_team_goals) && !empty($match->match_away_team_goals)) {
-        return false;
-    }
-
-    $home_team_goals = 0;
-    $away_team_goals = 0;
-    $home_team_lvl = $home_team->team_level;
-    $away_team_lvl = $away_team->team_level;
-
-    for ($i = 1; $i < 6; $i++) {
-        if (fs_try_to_score($home_team_lvl)) {
-            $home_team_goals++;
-        }
-        if (fs_try_to_score($away_team_lvl)) {
-            $away_team_goals++;
-        }
-        $home_team_lvl -= 20;
-        $away_team_lvl -= 20;
-    }
-
-    update_post_meta($match->ID, 'match_home_team_goals', $home_team_goals);
-    update_post_meta($match->ID, 'match_away_team_goals', $away_team_goals);
-}
-
-function fs_try_to_score($skill_level)
-{
-    $goal = false;
-
-    if (rand(0, 100) <= $skill_level) {
-        $goal = true;
-    }
-
-    return $goal;
-}
-
 register_activation_hook( __FILE__, 'fs_plugin_activate' );
 function fs_plugin_activate() {
     $teams = get_posts([
@@ -298,3 +211,5 @@ function ocdi_import_files() {
         ]
     ];
 }
+
+new \FootballSimulator\AjaxHandler();
