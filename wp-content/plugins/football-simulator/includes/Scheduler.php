@@ -4,6 +4,31 @@ namespace FootballSimulator;
 
 class Scheduler {
 
+	private array $defaultInfo = [
+		'pts'       => 0,
+		'w'         => 0,
+		'd'         => 0,
+		'l'         => 0,
+		'scored'    => 0,
+		'conceded'  => 0,
+		'goad_diff' => 0,
+	];
+
+	private const WIN = 3;
+	private const DRAW = 1;
+
+	public function getSortedTableInfo($teams_info) {
+		array_multisort(
+			array_column($teams_info, 'pts'), SORT_DESC,
+			array_column($teams_info, 'goad_diff'), SORT_DESC,
+			array_column($teams_info, 'scored'), SORT_DESC,
+			array_column($teams_info, 'conceded'), SORT_DESC,
+			$teams_info
+		);
+
+		return $teams_info;
+	}
+
 	public function getTeamsInfo( $current_week_matches, $current_week ) {
 		$teams = [];
 		foreach ( $current_week_matches as $current_week_match ) {
@@ -20,16 +45,8 @@ class Scheduler {
 	}
 
 	private function getTeamInfo( $team, $current_week ) {
-		$info = [
-			'post'      => $team,
-			'pts'       => 0,
-			'w'         => 0,
-			'd'         => 0,
-			'l'         => 0,
-			'scored'    => 0,
-			'conceded'  => 0,
-			'goad_diff' => 0,
-		];
+		$info = $this->defaultInfo;
+		$info['post'] = $team;
 
 		$matches = get_posts( [
 			'numberposts' => - 1,
@@ -61,7 +78,7 @@ class Scheduler {
 		foreach ( $matches as $match ) {
 
 			// Counting goals considering it's home or away
-			if ( $match->match_home_team_goals == $team->ID ) {
+			if ( $match->match_home_team == $team->ID ) {
 				$scored   = $match->match_home_team_goals;
 				$conceded = $match->match_away_team_goals;
 			} else {
@@ -74,10 +91,10 @@ class Scheduler {
 			// Adding points
 			if ( $scored > $conceded ) {
 				$info['w'] ++;
-				$info['pts'] += 3;
+				$info['pts'] += $this::WIN;
 			} else if ( $scored == $conceded ) {
 				$info['d'] ++;
-				$info['pts'] += 1;
+				$info['pts'] += $this::DRAW;
 			} else {
 				$info['l'] ++;
 			}
@@ -146,17 +163,5 @@ class Scheduler {
 		$result[1] = $tmp;
 
 		return $result;
-	}
-
-	public function getSortedTableInfo($teams_info) {
-		array_multisort(
-			array_column($teams_info, 'pts'), SORT_DESC,
-			array_column($teams_info, 'goad_diff'), SORT_DESC,
-			array_column($teams_info, 'scored'), SORT_DESC,
-			array_column($teams_info, 'conceded'), SORT_DESC,
-			$teams_info
-		);
-
-		return $teams_info;
 	}
 }

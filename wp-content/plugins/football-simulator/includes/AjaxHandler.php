@@ -94,7 +94,7 @@ class AjaxHandler {
 		wp_send_json( $response );
 	}
 
-	function showTables() {
+	static function showTables() {
 		$tournament_post = fs_get_post();
 		$response        = [];
 		for ( $week = 1; $week <= $tournament_post->tour_current_week; $week ++ ) {
