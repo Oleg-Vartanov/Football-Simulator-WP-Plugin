@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         <th scope="col">L</th>
         <th scope="col">GD</th>
         <th scope="col"><?php echo __('Результаты матчей', 'textdomain'); ?></th>
-        <?php if ($current_week >=4 && $current_week < (count($teams_info) - 1) * 2) { ?>
+        <?php if ($current_week >= \FootballSimulator\ProbabilityCalculator::START_CALC_WEEK && $current_week < (count($teams_info) - 1) * 2) { ?>
         <th scope="col"><?php echo __('Предсказание победителя после недели', 'textdomain') . ' ' . $current_week; ?></th>
         <?php } ?>
     </tr>

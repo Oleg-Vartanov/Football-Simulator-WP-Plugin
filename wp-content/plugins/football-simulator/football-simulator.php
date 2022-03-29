@@ -154,7 +154,7 @@ function fs_get_updated_table_response($week) {
 	$teams_info = $scheduler->getTeamsInfo($current_week_matches, $current_week);
 
     // Calculate winning probabilities
-    if ($current_week >= 4 && $current_week < (count($teams_info) - 1) * 2) {
+    if ($current_week >= ProbabilityCalculator::START_CALC_WEEK && $current_week < (count($teams_info) - 1) * 2) {
         $pr = new ProbabilityCalculator($teams_info, $current_week);
         $winning_probabilities = $pr->getWinProbabilities();
     }

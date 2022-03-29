@@ -13,7 +13,9 @@ class ProbabilityCalculator
 
     private array $set = ['W', 'D', 'L'];
 
-    function __construct($teamsInfo, $currentWeek) {
+	public const START_CALC_WEEK = 4;
+
+	function __construct($teamsInfo, $currentWeek) {
         $this->teamsInfo = $teamsInfo; // Current table info array
 	    $this->scheduler = new Scheduler();
         $weeksRemaining = fs_get_remaining_weeks($currentWeek);
