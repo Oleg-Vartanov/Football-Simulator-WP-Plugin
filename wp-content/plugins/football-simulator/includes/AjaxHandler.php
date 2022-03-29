@@ -77,6 +77,7 @@ class AjaxHandler {
 			'meta_value'  => 1 // Take a first week
 		] );
 		$teams_info           = $scheduler->getTeamsInfo( $current_week_matches, $current_week );
+		$nonce = wp_create_nonce( 'fs-nonce' );
 		require WP_PLUGIN_DIR . '/football-simulator/template-parts/content-page-tournament-table.php';
 		$table = ob_get_contents();
 		ob_end_clean();
@@ -104,6 +105,8 @@ class AjaxHandler {
 	}
 
 	public function editScore() {
+		check_ajax_referer( 'fs-nonce', 'nonce' );
+
 		if ( $_POST['team'] == 'home' ) {
 			update_post_meta( $_POST['match_id'], 'match_home_team_goals', $_POST['goals'] );
 		} else if ( $_POST['team'] == 'away' ) {

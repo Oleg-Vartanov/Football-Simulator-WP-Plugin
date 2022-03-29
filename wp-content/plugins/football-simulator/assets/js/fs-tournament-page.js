@@ -23,6 +23,7 @@ jQuery(document).ready(function($) {
         let data = {
             action: 'fs_edit_score',
             goals: $(this).val(),
+            nonce: $(this).data("nonce"),
             team: $(this).data("team"),
             match_id: $(this).data("match-id")
         };

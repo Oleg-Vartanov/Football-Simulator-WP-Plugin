@@ -161,7 +161,8 @@ function fs_get_updated_table_response($week) {
 
     $teams_info = $scheduler->getSortedTableInfo($teams_info);
 
-    require __DIR__ . '/template-parts/content-page-tournament-table.php';
+	$nonce = wp_create_nonce( 'fs-nonce' );
+	require __DIR__ . '/template-parts/content-page-tournament-table.php';
 
     $table = ob_get_contents();
     ob_end_clean();

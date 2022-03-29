@@ -3,6 +3,7 @@
  * @var array $teams_info Team's info in a current's week table
  * @var int $current_week
  * @var array<WP_Post> $current_week_matches
+ * @var string $nonce WP nonce token
  */
 
 // Exit if accessed directly
@@ -44,11 +45,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <?php echo get_the_title($match->match_home_team); ?>
                         <input class="goals"
                                data-team="home"
+                               data-nonce="<?php echo esc_attr( $nonce ) ?>"
                                data-match-id="<?php echo $match->ID; ?>"
                                value="<?php echo $match->match_home_team_goals; ?>">
                         <span> - </span>
                         <input class="goals"
                                data-team="away"
+                               data-nonce="<?php echo esc_attr( $nonce ) ?>"
                                data-match-id="<?php echo $match->ID; ?>"
                                value="<?php echo $match->match_away_team_goals; ?>">
                         <?php echo get_the_title($match->match_away_team); ?>
