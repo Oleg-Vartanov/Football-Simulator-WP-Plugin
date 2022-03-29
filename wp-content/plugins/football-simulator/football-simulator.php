@@ -7,6 +7,11 @@
  * Domain Path:       /languages
  */
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit();
+}
+
 require 'includes/Scheduler.php';
 require 'includes/ProbabilityCalculator.php';
 require 'includes/AjaxHandler.php';

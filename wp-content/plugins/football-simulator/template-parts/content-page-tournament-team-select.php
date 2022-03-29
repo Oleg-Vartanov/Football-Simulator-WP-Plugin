@@ -2,6 +2,11 @@
 /**
  * @var array<WP_Post> $all_teams List of all teams
  */
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit();
+}
 ?>
 <div class="container">
     <div class="row">

@@ -4,6 +4,11 @@
  * @var int $current_week
  * @var array<WP_Post> $current_week_matches
  */
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit();
+}
 ?>
 <table class="table">
     <thead>
