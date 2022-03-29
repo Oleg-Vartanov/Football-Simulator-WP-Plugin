@@ -41,9 +41,9 @@ jQuery(document).ready(function($) {
     });
 
     $(document).on('click', '.start-tournament', function() {
-        if ($("select option:selected").length != 4) {
+        if ($("select option:selected").length != $(".start_calc_week").val()) {
             $(".team-select").val("");
-            alert('Необходимо выбрать 4 команды');
+            alert('Необходимо выбрать ' + $(".start_calc_week").val() + ' команды');
             return false;
         }
 

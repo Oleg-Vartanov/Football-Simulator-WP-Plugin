@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 ?>
+<input type="hidden" class="start_calc_week" value="<?php echo \FootballSimulator\ProbabilityCalculator::START_CALC_WEEK ?>">
 <div class="container">
     <div class="row">
         <label for="team-select"><?php echo __('Выбрать 4 команды', 'textdomain'); ?>:</label>
