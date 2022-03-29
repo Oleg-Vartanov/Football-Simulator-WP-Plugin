@@ -3,7 +3,13 @@
  * @var array $teams_info Team's info in a current's week table
  * @var int $current_week
  * @var array<WP_Post> $current_week_matches
+ * @var string $nonce WP nonce token
  */
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit();
+}
 ?>
 <table class="table">
     <thead>
@@ -16,7 +22,7 @@
         <th scope="col">L</th>
         <th scope="col">GD</th>
         <th scope="col"><?php echo __('Результаты матчей', 'textdomain'); ?></th>
-        <?php if ($current_week >=4 && $current_week < (count($teams_info) - 1) * 2) { ?>
+        <?php if ($current_week >= \FootballSimulator\ProbabilityCalculator::START_CALC_WEEK && $current_week < (count($teams_info) - 1) * 2) { ?>
         <th scope="col"><?php echo __('Предсказание победителя после недели', 'textdomain') . ' ' . $current_week; ?></th>
         <?php } ?>
     </tr>
@@ -39,11 +45,13 @@
                     <?php echo get_the_title($match->match_home_team); ?>
                         <input class="goals"
                                data-team="home"
+                               data-nonce="<?php echo esc_attr( $nonce ) ?>"
                                data-match-id="<?php echo $match->ID; ?>"
                                value="<?php echo $match->match_home_team_goals; ?>">
                         <span> - </span>
                         <input class="goals"
                                data-team="away"
+                               data-nonce="<?php echo esc_attr( $nonce ) ?>"
                                data-match-id="<?php echo $match->ID; ?>"
                                value="<?php echo $match->match_away_team_goals; ?>">
                         <?php echo get_the_title($match->match_away_team); ?>

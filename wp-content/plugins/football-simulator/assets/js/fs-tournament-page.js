@@ -23,6 +23,7 @@ jQuery(document).ready(function($) {
         let data = {
             action: 'fs_edit_score',
             goals: $(this).val(),
+            nonce: $(this).data("nonce"),
             team: $(this).data("team"),
             match_id: $(this).data("match-id")
         };
@@ -41,9 +42,9 @@ jQuery(document).ready(function($) {
     });
 
     $(document).on('click', '.start-tournament', function() {
-        if ($("select option:selected").length != 4) {
+        if ($("select option:selected").length != $(".start_calc_week").val()) {
             $(".team-select").val("");
-            alert('Необходимо выбрать 4 команды');
+            alert('Необходимо выбрать ' + $(".start_calc_week").val() + ' команды');
             return false;
         }
 

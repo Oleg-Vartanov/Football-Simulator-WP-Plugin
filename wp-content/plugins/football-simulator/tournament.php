@@ -10,6 +10,11 @@
  * @since Twenty Twenty-One 1.0
  */
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit();
+}
+
 get_header();
 
 $all_teams = get_posts([
@@ -18,6 +23,7 @@ $all_teams = get_posts([
 ]);
 $thumb = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full')['0'];
 
+$teams_info = [];
 if ($post->tour_status == 'in_progress') {
     $current_week = $post->tour_current_week;
     $current_week_matches = get_posts([
@@ -26,7 +32,7 @@ if ($post->tour_status == 'in_progress') {
         'meta_key'      => 'match_week',
         'meta_value'    => 1 // Take a first week
     ]);
-    $teams_info = fs_get_teams_info($current_week_matches, $current_week);
+    $teams_info = (new \FootballSimulator\Scheduler())->getTeamsInfo($current_week_matches, $current_week);
 }
 
 /* Start the Loop */

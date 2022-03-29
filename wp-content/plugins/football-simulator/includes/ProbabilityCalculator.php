@@ -1,17 +1,23 @@
 <?php
 
+namespace FootballSimulator;
+
 class ProbabilityCalculator
 {
     private array $allVariations = [];
     private array $winProbabilities = [];
+    private $scheduler = [];
 
     private array $remainingMatches = []; // Array<WP_Post>
     private array $teamsInfo;
 
     private array $set = ['W', 'D', 'L'];
 
-    function __construct($teamsInfo, $currentWeek) {
+	public const START_CALC_WEEK = 4;
+
+	function __construct($teamsInfo, $currentWeek) {
         $this->teamsInfo = $teamsInfo; // Current table info array
+	    $this->scheduler = new Scheduler();
         $weeksRemaining = fs_get_remaining_weeks($currentWeek);
 
         // Getting remaining matches
@@ -65,7 +71,7 @@ class ProbabilityCalculator
             }
         }
 
-        $variationTeamsInfo = fs_get_sorted_table_info($variationTeamsInfo);
+        $variationTeamsInfo = $this->scheduler->getSortedTableInfo($variationTeamsInfo);
 
         if (empty($this->winProbabilities[$variationTeamsInfo[0]['post']->ID])) {
             $this->winProbabilities[$variationTeamsInfo[0]['post']->ID] = 0;
